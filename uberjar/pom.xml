@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>cym2</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
     <artifactId>uberjar-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <name>UberJar Maven2 Plugin</name>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <inceptionYear>2007</inceptionYear>
     <licenses>
         <license>
@@ -24,13 +24,13 @@
     </licenses>
     <scm>
         <connection>
-            scm:git:http://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2/uberjar
+            scm:git:git://github.com/jiaqi/cym2/uberjar
         </connection>
         <developerConnection>
-            scm:git:https://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2/uberjar
+            scm:git:git://github.com/jiaqi/cym2/uberjar
         </developerConnection>
         <url>
-            https://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2/uberjar
+            https://github.com/jiaqi/cym2/uberjar
         </url>
     </scm>
     <build>

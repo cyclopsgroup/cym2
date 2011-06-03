@@ -12,17 +12,17 @@
     <artifactId>cym2</artifactId>
     <packaging>pom</packaging>
     <name>CyclopsGroup Maven2 Plugins and Extensions</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <inceptionYear>2003</inceptionYear>
     <scm>
         <connection>
-            scm:git:http://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2
+            scm:git:git://github.com/jiaqi/cym2
         </connection>
         <developerConnection>
-            scm:git:https://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2
+            scm:git:git://github.com/jiaqi/cym2
         </developerConnection>
         <url>
-            https://github.com/jiaqi/cyclopsgroup/cym2/trunk/cym2
+            https://github.com/jiaqi/cym2
         </url>
     </scm>
     <modules>
