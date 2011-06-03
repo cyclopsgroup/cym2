@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Package: org.codehaus.classworlds
+Main-Class: org.codehaus.classworlds.uberjar.boot.Bootstrapper
+Created-By: CyclopsGroup.org
+Built-By: uberjar-maven-plugin
