@@ -39,7 +39,7 @@ public class UberjarMojo
 
     /**
      * Name of main class invoked by classworlds
-     * 
+     *
      * @parameter
      * @required
      * @description Name of the executable main class
@@ -62,7 +62,7 @@ public class UberjarMojo
 
     /**
      * Name of generated uberjar file
-     * 
+     *
      * @parameter expression="${basedir}/target/${project.artifactId}-uber-${project.version}.jar"
      * @required
      */
@@ -88,9 +88,15 @@ public class UberjarMojo
             output.putNextEntry( new JarEntry( entry ) );
             getLog().debug( "Adding entry " + entry.getName() + "(" + entry.getSize() + " bytes)" );
             InputStream entryInput = file.getInputStream( entry );
-            IOUtils.copy( entryInput, output );
-            entryInput.close();
-            output.flush();
+            try
+            {
+                IOUtils.copy( entryInput, output );
+                output.flush();
+            }
+            finally
+            {
+                entryInput.close();
+            }
         }
     }
 
@@ -108,10 +114,16 @@ public class UberjarMojo
         entry.setTime( file.lastModified() );
         output.putNextEntry( entry );
         FileInputStream input = new FileInputStream( file );
-        getLog().info( "Adding " + entry.getName() );
-        IOUtils.copy( input, output );
-        input.close();
-        output.flush();
+        try
+        {
+            getLog().info( "Adding " + entry.getName() );
+            IOUtils.copy( input, output );
+            output.flush();
+        }
+        finally
+        {
+            input.close();
+        }
     }
 
     /**

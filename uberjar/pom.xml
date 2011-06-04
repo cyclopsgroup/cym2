@@ -2,19 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>cym2</artifactId>
         <version>1.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <groupId>org.cyclopsgroup</groupId>
     <artifactId>uberjar-maven-plugin</artifactId>
-    <packaging>maven-plugin</packaging>
-    <name>UberJar Maven2 Plugin</name>
     <version>1.2</version>
+    <name>UberJar Maven2 Plugin</name>
+    <packaging>maven-plugin</packaging>
     <inceptionYear>2007</inceptionYear>
+    <description>Maven plugin to create uberjar bundle out of a java package</description>
+    <url>http://wiki.cyclopsgroup.org/uberjar-maven-plugin</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -40,6 +42,19 @@
                 <configuration>
                     <goalPrefix>uberjar</goalPrefix>
                 </configuration>
+            </plugin>
+            <!-- A work around for problem http://maven.40175.n5.nabble.com/gpg-sign-and-repository-bundle-create-produce-bad-signatures-td127504.html -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
