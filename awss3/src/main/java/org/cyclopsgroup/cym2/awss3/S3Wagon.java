@@ -63,6 +63,8 @@ public class S3Wagon
     private final Properties mimeTypes;
 
     /**
+     * Default constructor reads mime type mapping from generated properties file for later use
+     *
      * @throws IOException Allows IO errors
      */
     public S3Wagon()
@@ -95,13 +97,20 @@ public class S3Wagon
         Resource resource = new Resource( destination );
         firePutInitiated( resource, inFile );
         String key = keyPrefix + destination;
+
+        // Prepare for meta data
         ObjectMetadata meta = new ObjectMetadata();
+
+        // Content length is important. Many S3 client relies on it
         if ( contentLength != -1 )
         {
             meta.setContentLength( contentLength );
         }
+
+        // Last modified data is used by CloudFront
         meta.setLastModified( new Date( lastModified ) );
 
+        // Find mime type based on file extension
         int lastDot = destination.lastIndexOf( '.' );
         String mimeType = null;
         if ( lastDot != -1 )
@@ -126,6 +135,8 @@ public class S3Wagon
         {
             fireTransferDebug( "Uploading file " + inFile + " to  key " + key + " in S3 bucket " + bucketName );
             firePutStarted( resource, inFile );
+
+            // Upload file and allow everyone to read
             s3.putObject( bucketName, key, in, meta );
             s3.setObjectAcl( bucketName, key, CannedAccessControlList.PublicRead );
             firePutCompleted( resource, inFile );
@@ -158,6 +169,7 @@ public class S3Wagon
             }
             else if ( e.getStatusCode() == 403 )
             {
+                // 403 is thrown when key does not exist and configuration doesn't allow user to list keys
                 throw new ResourceDoesNotExistException( "403 implies that key " + key + " does not exist in bucket "
                     + bucketName, e );
             }
@@ -190,6 +202,8 @@ public class S3Wagon
         try
         {
             fireGetStarted( resource, destination );
+
+            // This is a bit more efficient than copying stream
             s3.getObject( new GetObjectRequest( bucketName, key ), destination );
             fireGetCompleted( resource, destination );
         }
@@ -221,6 +235,8 @@ public class S3Wagon
             path += "/";
         }
         fireSessionDebug( "Listing objects with prefix " + path + " under bucket " + bucketName );
+
+        // Since S3 does not have concept of directory, result contains all contents with given prefix
         ObjectListing result =
             s3.listObjects( new ListObjectsRequest().withBucketName( bucketName ).withPrefix( path ).withDelimiter( "/" ) );
         if ( result.getObjectSummaries().isEmpty() )
@@ -318,21 +334,26 @@ public class S3Wagon
     protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
+        // Retrieve credentials from authentication information is always required since it has access key and secret
+        // key
         AuthenticationInfo auth = getAuthenticationInfo();
         if ( auth == null )
         {
             throw new AuthenticationException( "S3 access requires authentication information" );
         }
-        ProxyInfo proxy = getProxyInfo();
-        fireSessionDebug( "Setting up AWS S3 client with source "
-            + ToStringBuilder.reflectionToString( getRepository() ) + ", authentication information and proxy "
-            + ToStringBuilder.reflectionToString( proxy ) );
         AWSCredentials credentials = new BasicAWSCredentials( auth.getUserName(), auth.getPassword() );
+
+        // Pass timeout configuration to AWS client config
         ClientConfiguration config = new ClientConfiguration();
         config.setConnectionTimeout( getTimeout() );
         config.setSocketTimeout( getTimeout() );
         fireSessionDebug( "Connect timeout and socket timeout is set to " + getTimeout() + " ms" );
 
+        // Possible proxy
+        ProxyInfo proxy = getProxyInfo();
+        fireSessionDebug( "Setting up AWS S3 client with source "
+            + ToStringBuilder.reflectionToString( getRepository() ) + ", authentication information and proxy "
+            + ToStringBuilder.reflectionToString( proxy ) );
         if ( proxy != null )
         {
             config.setProxyDomain( proxy.getNtlmDomain() );
@@ -344,10 +365,12 @@ public class S3Wagon
         }
         fireSessionDebug( "AWS Client config is " + ToStringBuilder.reflectionToString( config ) );
 
+        // Create client
         s3 = new AmazonS3Client( credentials, config );
         bucketName = getRepository().getHost();
         fireSessionDebug( "Bucket name is " + bucketName );
 
+        // Figure out path defined in pom.xml
         String prefix = StringUtils.trimToEmpty( getRepository().getBasedir() );
         if ( !prefix.endsWith( "/" ) )
         {
