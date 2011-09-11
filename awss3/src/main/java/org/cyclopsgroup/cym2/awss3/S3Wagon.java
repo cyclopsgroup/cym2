@@ -341,6 +341,16 @@ public class S3Wagon
         {
             throw new AuthenticationException( "S3 access requires authentication information" );
         }
+        if ( StringUtils.isEmpty( auth.getUserName() ) )
+        {
+            throw new AuthenticationException(
+                                               "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml" );
+        }
+        if ( StringUtils.isEmpty( auth.getPassword() ) )
+        {
+            throw new AuthenticationException(
+                                               "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml" );
+        }
         AWSCredentials credentials = new BasicAWSCredentials( auth.getUserName(), auth.getPassword() );
 
         // Pass timeout configuration to AWS client config
