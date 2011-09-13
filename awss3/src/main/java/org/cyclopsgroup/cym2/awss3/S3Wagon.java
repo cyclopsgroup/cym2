@@ -458,6 +458,7 @@ public class S3Wagon
     /**
      * @inheritDoc
      */
+    @Override
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
@@ -480,6 +481,7 @@ public class S3Wagon
     /**
      * @inheritDoc
      */
+    @Override
     public boolean supportsDirectoryCopy()
     {
         return true;
