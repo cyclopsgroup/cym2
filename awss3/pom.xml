@@ -70,7 +70,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <properties>
-        <aws.sdk.version>1.7.1</aws.sdk.version>
-    </properties>
 </project>

@@ -59,4 +59,8 @@
             </plugins>
         </pluginManagement>
     </build>
+    <properties>
+        <aws.sdk.version>1.7.1</aws.sdk.version>
+        <mvn.version>3.2.1</mvn.version>
+    </properties>
 </project>
