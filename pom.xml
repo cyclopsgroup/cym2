@@ -28,6 +28,7 @@
         <module>flatsite</module>
         <module>uberjar</module>
         <module>awss3</module>
+        <module>s3upload</module>
     </modules>
     <build>
         <pluginManagement>
