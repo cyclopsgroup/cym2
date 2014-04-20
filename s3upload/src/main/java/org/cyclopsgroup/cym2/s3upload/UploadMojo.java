@@ -18,11 +18,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 
-/**
- * @author <a href="mailto:jiaqi.guo@gmail.com">Jiaqi Guo</a>
- * @description Upload files in predefined filesets to S3 server
- * @goal upload
- */
 @Mojo( name = "upload" )
 public class UploadMojo
     extends AbstractMojo
