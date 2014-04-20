@@ -9,7 +9,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.cyclopsgroup</groupId>
     <artifactId>flatsite-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <name>Flatsite Maven2 Plugin</name>
@@ -30,6 +29,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.2</version>
                 <configuration>
                     <goalPrefix>flatsite</goalPrefix>
                 </configuration>
