@@ -13,48 +13,31 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 
-/**
- * @author <a href="mailto:jiaqi.guo@gmail.com">Jiaqi Guo</a>
- * @description Generate site from flatsite templates
- * @goal flatsite
- */
+@Mojo( name = "flatsite" )
 public class FlatSiteMojo
     extends AbstractMojo
 {
-    /**
-     * @parameter expression="${basedir}/target/site
-     * @required
-     */
+    @Parameter( defaultValue = "${basedir}/target/site" )
     private File flatsiteOutputDirectory;
 
-    /**
-     * @parameter expression="${basedir}/src/flatsite
-     * @required
-     */
+    @Parameter( defaultValue = "${basedir}/src/flatsite" )
     private File flatsiteSourceDirectory;
 
-    /**
-     * @parameter expression="default_layout.vm"
-     * @required
-     */
+    @Parameter( defaultValue = "default_layout.vm" )
     private String layout;
 
-    /**
-     * @parameter expression="${project}"
-     * @readonly
-     * @required
-     */
+    @Component
     private MavenProject project;
 
-    /**
-     * @parameter expression=".vm"
-     * @required
-     */
+    @Parameter( defaultValue = ".vm" )
     private String templateSuffix;
 
     private VelocityEngine velocityEngine;
@@ -85,7 +68,8 @@ public class FlatSiteMojo
             }
             else
             {
-                getLog().info( "Copy file from " + file + " into " + toDirectory );
+                getLog().info( "Copy file from " + file + " into "
+                                   + toDirectory );
                 FileUtils.copyFileToDirectory( file, toDirectory );
             }
         }
@@ -94,17 +78,20 @@ public class FlatSiteMojo
     /**
      * @inheritDoc
      */
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
         if ( !flatsiteSourceDirectory.isDirectory() )
         {
-            getLog().info( flatsiteSourceDirectory + " doesn't exist. There's nothing to do" );
+            getLog().info( flatsiteSourceDirectory
+                               + " doesn't exist. There's nothing to do" );
             return;
         }
         if ( !flatsiteOutputDirectory.isDirectory() )
         {
-            getLog().info( "Makding destination directory " + flatsiteOutputDirectory );
+            getLog().info( "Makding destination directory "
+                               + flatsiteOutputDirectory );
             flatsiteOutputDirectory.mkdirs();
         }
 
@@ -115,10 +102,12 @@ public class FlatSiteMojo
             getLog().info( props.getString( "file.resource.loader.path" ) );
             velocityEngine = new VelocityEngine();
             velocityEngine.setExtendedProperties( props );
-            velocityEngine.setProperty( "file.resource.loader.path", flatsiteSourceDirectory.getAbsolutePath() );
+            velocityEngine.setProperty( "file.resource.loader.path",
+                                        flatsiteSourceDirectory.getAbsolutePath() );
             velocityEngine.init();
             generateSiteDirectory( "" );
-            copyDirectory( new File( flatsiteSourceDirectory, "resources" ), flatsiteOutputDirectory );
+            copyDirectory( new File( flatsiteSourceDirectory, "resources" ),
+                           flatsiteOutputDirectory );
         }
         catch ( Exception e )
         {
@@ -129,7 +118,8 @@ public class FlatSiteMojo
     private void generateSiteDirectory( String relativeDirectory )
         throws IOException
     {
-        File currentSourceDirectory = new File( flatsiteSourceDirectory, "content/" + relativeDirectory );
+        File currentSourceDirectory =
+            new File( flatsiteSourceDirectory, "content/" + relativeDirectory );
         File[] files = currentSourceDirectory.listFiles();
         for ( File file : files )
         {
@@ -139,7 +129,8 @@ public class FlatSiteMojo
             }
             if ( file.isDirectory() )
             {
-                generateSiteDirectory( mergePath( relativeDirectory, file.getName() ) );
+                generateSiteDirectory( mergePath( relativeDirectory,
+                                                  file.getName() ) );
             }
             else if ( file.getName().endsWith( templateSuffix ) )
             {
@@ -147,7 +138,8 @@ public class FlatSiteMojo
             }
             else
             {
-                getLog().warn( "Ignore resource " + file + " since it's not a velicity template" );
+                getLog().warn( "Ignore resource " + file
+                                   + " since it's not a velicity template" );
             }
         }
     }
@@ -161,7 +153,9 @@ public class FlatSiteMojo
             getLog().info( "Making directory " + destDirectory );
             destDirectory.mkdirs();
         }
-        String htmlFileName = fileName.substring( 0, fileName.length() - templateSuffix.length() ) + ".html";
+        String htmlFileName =
+            fileName.substring( 0, fileName.length() - templateSuffix.length() )
+                + ".html";
         File htmlFile = new File( destDirectory, htmlFileName );
 
         Context context = new VelocityContext();
@@ -175,7 +169,8 @@ public class FlatSiteMojo
         context.put( "now", new Date() );
         context.put( "dateFormat", DateFormat.getDateInstance() );
         context.put( "timeFormat", DateFormat.getTimeInstance() );
-        context.put( "sourceDirectory", flatsiteSourceDirectory.getAbsolutePath() );
+        context.put( "sourceDirectory",
+                     flatsiteSourceDirectory.getAbsolutePath() );
 
         String basedir;
         if ( StringUtils.isEmpty( fileDirectory ) )
@@ -193,18 +188,20 @@ public class FlatSiteMojo
         }
 
         context.put( "basedir", basedir );
+        context.put( "link", new PageLinkTool( basedir ) );
 
         try
         {
             StringWriter bodyWriter = new StringWriter();
             velocityEngine.mergeTemplate( templatePath, context, bodyWriter );
 
-            String layoutTemplatePath = "layout/" + (String) context.get( "layout" );
+            String layoutTemplatePath =
+                "layout/" + (String) context.get( "layout" );
             String body = bodyWriter.toString();
             context.put( "body", body );
 
-            getLog().info(
-                           "Generating " + htmlFile + " from template " + templatePath + " with layout "
+            getLog().info( "Generating " + htmlFile + " from template "
+                               + templatePath + " with layout "
                                + layoutTemplatePath );
             FileWriter output = new FileWriter( htmlFile );
             velocityEngine.mergeTemplate( layoutTemplatePath, context, output );
@@ -220,6 +217,7 @@ public class FlatSiteMojo
 
     private String mergePath( String relativePath, String fileName )
     {
-        return StringUtils.isEmpty( relativePath ) ? fileName : relativePath + "/" + fileName;
+        return StringUtils.isEmpty( relativePath ) ? fileName : relativePath
+            + "/" + fileName;
     }
 }
