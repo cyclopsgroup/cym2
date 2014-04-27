@@ -71,6 +71,14 @@ public class UploadMojo
         else if ( StringUtils.isNotBlank( server ) )
         {
             Server s = settings.getServer( server );
+            if ( s == null || StringUtils.isBlank( s.getUsername() )
+                || StringUtils.isBlank( s.getPassword() ) )
+            {
+                throw new MojoFailureException(
+                                                "Server "
+                                                    + server
+                                                    + " is not defined in settings.xml with proper username and password" );
+            }
             creds =
                 new StaticCredentialsProvider(
                                                new BasicAWSCredentials(
