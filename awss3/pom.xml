@@ -70,4 +70,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+         <extensions>
+            <extension>
+                <groupId>org.cyclopsgroup</groupId>
+                <artifactId>awss3-maven-wagon</artifactId>
+                <version>${project.version}</version>
+            </extension>
+        </extensions>
+    </build>
 </project>

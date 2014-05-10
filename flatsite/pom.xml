@@ -90,5 +90,12 @@
                 </configuration>
             </plugin>
         </plugins>
+         <extensions>
+            <extension>
+                <groupId>org.cyclopsgroup</groupId>
+                <artifactId>awss3-maven-wagon</artifactId>
+                <version>${project.version}</version>
+            </extension>
+        </extensions>
     </build>
 </project>
