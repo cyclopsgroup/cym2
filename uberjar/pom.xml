@@ -15,13 +15,6 @@
     <inceptionYear>2007</inceptionYear>
     <description>Maven plugin to create uberjar bundle out of a java package</description>
     <url>http://wiki.cyclopsgroup.org/uberjar-maven-plugin</url>
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
     <scm>
         <connection>
             scm:git:git://github.com/jiaqi/cym2/uberjar
