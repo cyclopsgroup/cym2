@@ -157,7 +157,6 @@ public class FlatSiteMojo
             fileName.substring( 0, fileName.length() - templateSuffix.length() )
                 + ".html";
         File htmlFile = new File( destDirectory, htmlFileName );
-
         Context context = new VelocityContext();
         context.put( "layout", layout );
         context.put( "pom", project );
@@ -166,6 +165,7 @@ public class FlatSiteMojo
         context.put( "templatePath", templatePath );
         context.put( "htmlPath", mergePath( fileDirectory, htmlFileName ) );
         context.put( "xmltool", xmltool );
+        context.put( "widgets", new WidgetsTool() );
         context.put( "now", new Date() );
         context.put( "dateFormat", DateFormat.getDateInstance() );
         context.put( "timeFormat", DateFormat.getTimeInstance() );
