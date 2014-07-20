@@ -12,16 +12,23 @@ import org.dom4j.io.SAXReader;
 
 /**
  * A utility for XML manipulation using Dom4j internally
- * 
+ *
  * @author <a href="mailto:jiaqi.guo@gmail.com">Jiaqi Guo</a>
  */
 public class XmlTool
 {
+    private final File resourceRoot;
+
+    XmlTool( File resourceRoot )
+    {
+        this.resourceRoot = resourceRoot;
+    }
+
     private SAXReader saxReader = new SAXReader();
 
     /**
      * Split big list into list of small site-limited lists
-     * 
+     *
      * @param <T> Type of element
      * @param list Input big list
      * @param groupSize Size of small list(group)
@@ -29,7 +36,8 @@ public class XmlTool
      */
     public <T> List<List<T>> groupBy( List<T> list, int groupSize )
     {
-        List<List<T>> groups = new ArrayList<List<T>>( list.size() / groupSize + 1 );
+        List<List<T>> groups =
+            new ArrayList<List<T>>( list.size() / groupSize + 1 );
         for ( int index = 0; index < list.size(); index++ )
         {
             List<T> group;
@@ -50,7 +58,7 @@ public class XmlTool
 
     /**
      * Parse a File into Dom4j Document
-     * 
+     *
      * @param filePath Path of file
      * @return Dom4j document object
      * @throws DocumentException
@@ -58,12 +66,12 @@ public class XmlTool
     public Document parseFile( String filePath )
         throws DocumentException
     {
-        return saxReader.read( new File( filePath ) );
+        return saxReader.read( new File( resourceRoot, filePath ) );
     }
 
     /**
      * Parse a URL into Dom4j Document
-     * 
+     *
      * @param urlString URL of resource
      * @return Dom4j document
      * @throws DocumentException

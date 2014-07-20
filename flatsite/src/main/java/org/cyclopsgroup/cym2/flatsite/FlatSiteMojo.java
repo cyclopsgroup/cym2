@@ -42,8 +42,6 @@ public class FlatSiteMojo
 
     private VelocityEngine velocityEngine;
 
-    private XmlTool xmltool = new XmlTool();
-
     private void copyDirectory( File fromDirectory, File toDirectory )
         throws IOException
     {
@@ -164,7 +162,11 @@ public class FlatSiteMojo
         context.put( "description", project.getDescription() );
         context.put( "templatePath", templatePath );
         context.put( "htmlPath", mergePath( fileDirectory, htmlFileName ) );
-        context.put( "xmltool", xmltool );
+        context.put( "xmltool",
+                     new XmlTool(
+                                  new File(
+                                            flatsiteSourceDirectory.getAbsolutePath()
+                                                + "/resources" ) ) );
         context.put( "widgets", new WidgetsTool() );
         context.put( "now", new Date() );
         context.put( "dateFormat", DateFormat.getDateInstance() );
