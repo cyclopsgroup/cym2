@@ -8,6 +8,8 @@ import org.apache.commons.io.IOUtils;
 
 public class WidgetsTool
 {
+    public static final String TOOL_NAME = "widgets";
+
     public String renderHtmlBody( String url )
         throws IOException
     {

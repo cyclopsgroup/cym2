@@ -2,6 +2,8 @@ package org.cyclopsgroup.cym2.flatsite;
 
 public class PageLinkTool
 {
+    public static final String TOOL_NAME = "link";
+
     public class Link
     {
         private final String absolutePath;

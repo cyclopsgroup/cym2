@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
@@ -17,6 +18,8 @@ import org.dom4j.io.SAXReader;
  */
 public class XmlTool
 {
+    public static final String TOOL_NAME = "xmltool";
+
     private final File resourceRoot;
 
     XmlTool( File resourceRoot )
@@ -66,7 +69,12 @@ public class XmlTool
     public Document parseFile( String filePath )
         throws DocumentException
     {
-        return saxReader.read( new File( resourceRoot, filePath ) );
+        File file = new File( resourceRoot, filePath );
+        if ( !file.exists() )
+        {
+            return null;
+        }
+        return saxReader.read( file );
     }
 
     /**
@@ -80,6 +88,10 @@ public class XmlTool
     public Document parseUrl( String urlString )
         throws DocumentException, MalformedURLException
     {
+        if ( StringUtils.isBlank( urlString ) )
+        {
+            return null;
+        }
         return saxReader.read( new URL( urlString ) );
     }
 }
