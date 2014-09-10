@@ -25,7 +25,6 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
@@ -45,7 +44,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 /**
  * Amazon S3 wagon provider implementation
- * 
+ *
  * @author <a href="mailto:jiaqi@cyclopsgroup.org">Jiaqi Guo</a>
  */
 public class S3Wagon
@@ -64,7 +63,7 @@ public class S3Wagon
     /**
      * Default constructor reads mime type mapping from generated properties
      * file for later use
-     * 
+     *
      * @throws IOException Allows IO errors
      */
     public S3Wagon()
@@ -297,6 +296,14 @@ public class S3Wagon
         {
             return false;
         }
+        if ( meta.getLastModified() != null
+            && meta.getLastModified().getTime() > timestamp )
+        {
+            fireSessionDebug( "Remote timestamp " + meta.getLastModified()
+                + " is greater than local timestamp " + timestamp
+                + ", ignore get" );
+            return false;
+        }
         get( resourceName, destination );
         return true;
     }
@@ -312,6 +319,14 @@ public class S3Wagon
         ObjectMetadata meta = getRequiredMetadata( resourceName );
         if ( meta == null )
         {
+            return false;
+        }
+        if ( meta.getLastModified() != null
+            && meta.getLastModified().getTime() > timestamp )
+        {
+            fireSessionDebug( "Remote timestamp " + meta.getLastModified()
+                + " is greater than local timestamp " + timestamp
+                + ", ignore get" );
             return false;
         }
         Resource resource = new Resource( resourceName );
@@ -367,24 +382,27 @@ public class S3Wagon
         // Retrieve credentials from authentication information is always
         // required since it has access key and secret
         // key
-        AuthenticationInfo auth = getAuthenticationInfo();
-        if ( auth == null )
+        if ( authenticationInfo == null )
         {
             throw new AuthenticationException(
-                                               "S3 access requires authentication information" );
+                                               "S3 access requires authentication information. Repository is "
+                                                   + getRepository() );
         }
-        if ( StringUtils.isEmpty( auth.getUserName() ) )
+        if ( StringUtils.isEmpty( authenticationInfo.getUserName() ) )
         {
             throw new AuthenticationException(
-                                               "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml" );
+                                               "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml. Repository is "
+                                                   + getRepository() );
         }
-        if ( StringUtils.isEmpty( auth.getPassword() ) )
+        if ( StringUtils.isEmpty( authenticationInfo.getPassword() ) )
         {
             throw new AuthenticationException(
-                                               "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml" );
+                                               "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml. Repository is "
+                                                   + getRepository() );
         }
         AWSCredentials credentials =
-            new BasicAWSCredentials( auth.getUserName(), auth.getPassword() );
+            new BasicAWSCredentials( authenticationInfo.getUserName(),
+                                     authenticationInfo.getPassword() );
 
         // Pass timeout configuration to AWS client config
         ClientConfiguration config = new ClientConfiguration();
