@@ -5,12 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -50,15 +54,52 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 public class S3Wagon
     extends StreamWagon
 {
-    private final MimetypesFileTypeMap typeMap = new MimetypesFileTypeMap();
+    private static Map<String, String> loadMimeTypes()
+        throws IOException
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        InputStream in =
+            S3Wagon.class.getClassLoader().getResourceAsStream( "mime.types" );
+        try
+        {
+            LineNumberReader reader =
+                new LineNumberReader( new InputStreamReader( in ) );
+            for ( String line = reader.readLine(); line != null; line =
+                reader.readLine() )
+            {
+                if ( StringUtils.isBlank( line ) || line.startsWith( "#" ) )
+                {
+                    continue;
+                }
+                line = line.trim();
+                String[] pieces = line.split( "\\s+" );
+                if ( pieces.length <= 1 )
+                {
+                    continue;
+                }
+                String mimeType = pieces[0];
+                for ( int i = 1; i < pieces.length; i++ )
+                {
+                    map.put( pieces[i], mimeType );
+                }
+            }
+            return map;
+        }
+        finally
+        {
+            IOUtils.closeQuietly( in );
+        }
+    }
 
     private String bucketName;
 
     private String keyPrefix;
 
+    private final Map<String, String> mimeTypes;
+
     private AmazonS3 s3;
 
-    private final Properties mimeTypes;
+    private final MimetypesFileTypeMap typeMap = new MimetypesFileTypeMap();
 
     /**
      * Default constructor reads mime type mapping from generated properties
@@ -69,18 +110,7 @@ public class S3Wagon
     public S3Wagon()
         throws IOException
     {
-        Properties props = new Properties();
-        InputStream in =
-            getClass().getClassLoader().getResourceAsStream( "mimetypes.properties" );
-        try
-        {
-            props.load( in );
-            this.mimeTypes = props;
-        }
-        finally
-        {
-            IOUtils.closeQuietly( in );
-        }
+        this.mimeTypes = Collections.unmodifiableMap( loadMimeTypes() );
     }
 
     /**
@@ -125,7 +155,7 @@ public class S3Wagon
         {
             String ext =
                 destination.substring( lastDot + 1, destination.length() );
-            mimeType = mimeTypes.getProperty( ext );
+            mimeType = mimeTypes.get( ext );
         }
         if ( mimeType == null )
         {
