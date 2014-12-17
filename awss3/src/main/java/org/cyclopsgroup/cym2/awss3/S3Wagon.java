@@ -35,8 +35,10 @@ import org.apache.maven.wagon.resource.Resource;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -54,6 +56,8 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 public class S3Wagon
     extends StreamWagon
 {
+    private static final String INSTANCE_PROFILE_USER = "INSTANCE_PROFILE";
+
     private static Map<String, String> loadMimeTypes()
         throws IOException
     {
@@ -418,21 +422,40 @@ public class S3Wagon
                                                "S3 access requires authentication information. Repository is "
                                                    + getRepository() );
         }
+
+        // Raise a failure if username is not specified
         if ( StringUtils.isEmpty( authenticationInfo.getUserName() ) )
         {
             throw new AuthenticationException(
                                                "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml. Repository is "
                                                    + getRepository() );
         }
-        if ( StringUtils.isEmpty( authenticationInfo.getPassword() ) )
+        boolean instanceProfile =
+            INSTANCE_PROFILE_USER.equalsIgnoreCase( authenticationInfo.getUserName() );
+
+        AWSCredentialsProvider credentials;
+        if ( instanceProfile )
         {
-            throw new AuthenticationException(
-                                               "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml. Repository is "
-                                                   + getRepository() );
+            fireSessionDebug( "Creating instance profile credentials..." );
+            credentials = new InstanceProfileCredentialsProvider();
         }
-        AWSCredentials credentials =
-            new BasicAWSCredentials( authenticationInfo.getUserName(),
-                                     authenticationInfo.getPassword() );
+        else
+        {
+            // Raise a failure if password is not specified
+            if ( StringUtils.isEmpty( authenticationInfo.getPassword() ) )
+            {
+                throw new AuthenticationException(
+                                                   "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml. Repository is "
+                                                       + getRepository() );
+            }
+            fireSessionDebug( "Creating static credentials "
+                + authenticationInfo.getUserName() );
+            credentials =
+                new StaticCredentialsProvider(
+                                               new BasicAWSCredentials(
+                                                                        authenticationInfo.getUserName(),
+                                                                        authenticationInfo.getPassword() ) );
+        }
 
         // Pass timeout configuration to AWS client config
         ClientConfiguration config = new ClientConfiguration();
