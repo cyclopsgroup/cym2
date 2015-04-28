@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>cym2</artifactId>
-        <version>1.4.0</version>
+        <version>1.4.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>uberjar-maven-plugin</artifactId>

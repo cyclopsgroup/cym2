@@ -1,7 +1,5 @@
 package org.cyclopsgroup.cym2.awss3;
 
-import java.io.IOException;
-
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.junit.Ignore;
 
@@ -18,18 +16,23 @@ public class S3WagonTest
      * @inheritDoc
      */
     @Override
-    protected String getTestRepositoryUrl()
-        throws IOException
+    protected String getProtocol()
     {
-        return "s3://test-bucket/testpath/root";
+        return "s3";
+    }
+
+    @Override
+    protected int getTestRepositoryPort()
+    {
+        return 443;
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    protected String getProtocol()
+    protected String getTestRepositoryUrl()
     {
-        return "s3";
+        return "s3://test-bucket/testpath/root";
     }
 }

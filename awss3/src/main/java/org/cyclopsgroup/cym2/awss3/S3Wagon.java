@@ -62,14 +62,11 @@ public class S3Wagon
         throws IOException
     {
         Map<String, String> map = new HashMap<String, String>();
-        InputStream in =
-            S3Wagon.class.getClassLoader().getResourceAsStream( "mime.types" );
+        InputStream in = S3Wagon.class.getClassLoader().getResourceAsStream( "mime.types" );
         try
         {
-            LineNumberReader reader =
-                new LineNumberReader( new InputStreamReader( in ) );
-            for ( String line = reader.readLine(); line != null; line =
-                reader.readLine() )
+            LineNumberReader reader = new LineNumberReader( new InputStreamReader( in ) );
+            for ( String line = reader.readLine(); line != null; line = reader.readLine() )
             {
                 if ( StringUtils.isBlank( line ) || line.startsWith( "#" ) )
                 {
@@ -106,8 +103,7 @@ public class S3Wagon
     private final MimetypesFileTypeMap typeMap = new MimetypesFileTypeMap();
 
     /**
-     * Default constructor reads mime type mapping from generated properties
-     * file for later use
+     * Default constructor reads mime type mapping from generated properties file for later use
      *
      * @throws IOException Allows IO errors
      */
@@ -126,9 +122,7 @@ public class S3Wagon
     {
     }
 
-    private void doPutFromStream( InputStream in, File inFile,
-                                  String destination, long contentLength,
-                                  long lastModified )
+    private void doPutFromStream( InputStream in, File inFile, String destination, long contentLength, long lastModified )
     {
         Resource resource = new Resource( destination );
         firePutInitiated( resource, inFile );
@@ -137,8 +131,7 @@ public class S3Wagon
         dest = StringUtils.removeStart( dest, "/" );
 
         String key = keyPrefix + dest;
-        fireTransferDebug( "{keyPreix = " + keyPrefix + ", dest=" + destination
-            + "} -> " + dest );
+        fireTransferDebug( "{keyPreix = " + keyPrefix + ", dest=" + destination + "} -> " + dest );
 
         // Prepare for meta data
         ObjectMetadata meta = new ObjectMetadata();
@@ -157,8 +150,7 @@ public class S3Wagon
         String mimeType = null;
         if ( lastDot != -1 )
         {
-            String ext =
-                destination.substring( lastDot + 1, destination.length() );
+            String ext = destination.substring( lastDot + 1, destination.length() );
             mimeType = mimeTypes.get( ext );
         }
         if ( mimeType == null )
@@ -167,8 +159,7 @@ public class S3Wagon
         }
         else
         {
-            fireTransferDebug( "Mime type of " + dest + " is " + mimeType
-                + " according to build-in types" );
+            fireTransferDebug( "Mime type of " + dest + " is " + mimeType + " according to build-in types" );
         }
         if ( mimeType != null )
         {
@@ -177,8 +168,7 @@ public class S3Wagon
 
         try
         {
-            fireTransferDebug( "Uploading file " + inFile + " to  key " + key
-                + " in S3 bucket " + bucketName );
+            fireTransferDebug( "Uploading file " + inFile + " to  key " + key + " in S3 bucket " + bucketName );
             firePutStarted( resource, inFile );
             s3.putObject( bucketName, key, in, meta );
             firePutCompleted( resource, inFile );
@@ -194,8 +184,7 @@ public class S3Wagon
      */
     @Override
     public void fillInputData( InputData in )
-        throws TransferFailedException, ResourceDoesNotExistException,
-        AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         fireTransferDebug( "Filling input data" );
         String key = keyPrefix + in.getResource().getName();
@@ -208,21 +197,16 @@ public class S3Wagon
         {
             if ( e.getStatusCode() == 404 )
             {
-                throw new ResourceDoesNotExistException( "Key " + key
-                    + " does not exist in S3 bucket " + bucketName );
+                throw new ResourceDoesNotExistException( "Key " + key + " does not exist in S3 bucket " + bucketName );
             }
             else if ( e.getStatusCode() == 403 )
             {
                 // 403 is thrown when key does not exist and configuration
                 // doesn't allow user to list keys
-                throw new ResourceDoesNotExistException(
-                                                         "403 implies that key "
-                                                             + key
-                                                             + " does not exist in bucket "
-                                                             + bucketName, e );
+                throw new ResourceDoesNotExistException( "403 implies that key " + key + " does not exist in bucket "
+                    + bucketName, e );
             }
-            throw new TransferFailedException( "Can't get object " + key
-                + " from S4 bucket " + bucketName, e );
+            throw new TransferFailedException( "Can't get object " + key + " from S4 bucket " + bucketName, e );
         }
         in.getResource().setContentLength( object.getObjectMetadata().getContentLength() );
         in.getResource().setLastModified( object.getObjectMetadata().getLastModified().getTime() );
@@ -260,27 +244,22 @@ public class S3Wagon
         {
             if ( e.getStatusCode() == 404 )
             {
-                throw new ResourceDoesNotExistException( "Key " + key
-                    + " does not exist in bucket " + bucketName, e );
+                throw new ResourceDoesNotExistException( "Key " + key + " does not exist in bucket " + bucketName, e );
             }
             else if ( e.getStatusCode() == 403 )
             {
-                throw new ResourceDoesNotExistException(
-                                                         "403 implies that key "
-                                                             + key
-                                                             + " does not exist in bucket "
-                                                             + bucketName, e );
+                throw new ResourceDoesNotExistException( "403 implies that key " + key + " does not exist in bucket "
+                    + bucketName, e );
             }
-            throw new TransferFailedException( "Getting metadata of key " + key
-                + " failed", e );
+            throw new TransferFailedException( "Getting metadata of key " + key + " failed", e );
         }
     }
 
     /**
      * @inheritDoc
      */
-    @SuppressWarnings( "rawtypes" )
-    public List getFileList( String destinationDirectory )
+    @Override
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException
     {
         String path = keyPrefix + destinationDirectory;
@@ -288,8 +267,7 @@ public class S3Wagon
         {
             path += "/";
         }
-        fireSessionDebug( "Listing objects with prefix " + path
-            + " under bucket " + bucketName );
+        fireSessionDebug( "Listing objects with prefix " + path + " under bucket " + bucketName );
 
         // Since S3 does not have concept of directory, result contains all
         // contents with given prefix
@@ -297,9 +275,7 @@ public class S3Wagon
             s3.listObjects( new ListObjectsRequest().withBucketName( bucketName ).withPrefix( path ).withDelimiter( "/" ) );
         if ( result.getObjectSummaries().isEmpty() )
         {
-            throw new ResourceDoesNotExistException(
-                                                     "No keys exist with prefix "
-                                                         + path );
+            throw new ResourceDoesNotExistException( "No keys exist with prefix " + path );
         }
         Set<String> results = new HashSet<String>();
         for ( S3ObjectSummary summary : result.getObjectSummaries() )
@@ -321,8 +297,7 @@ public class S3Wagon
     /**
      * @inheritDoc
      */
-    public boolean getIfNewer( String resourceName, File destination,
-                               long timestamp )
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws ResourceDoesNotExistException, TransferFailedException
     {
         ObjectMetadata meta = getRequiredMetadata( resourceName );
@@ -330,12 +305,10 @@ public class S3Wagon
         {
             return false;
         }
-        if ( meta.getLastModified() != null
-            && meta.getLastModified().getTime() > timestamp )
+        if ( meta.getLastModified() != null && meta.getLastModified().getTime() > timestamp )
         {
-            fireSessionDebug( "Remote timestamp " + meta.getLastModified()
-                + " is greater than local timestamp " + timestamp
-                + ", ignore get" );
+            fireSessionDebug( "Remote timestamp " + meta.getLastModified() + " is greater than local timestamp "
+                + timestamp + ", ignore get" );
             return false;
         }
         get( resourceName, destination );
@@ -346,8 +319,7 @@ public class S3Wagon
      * @inheritDoc
      */
     @Override
-    public boolean getIfNewerToStream( String resourceName, OutputStream out,
-                                       long timestamp )
+    public boolean getIfNewerToStream( String resourceName, OutputStream out, long timestamp )
         throws ResourceDoesNotExistException, TransferFailedException
     {
         ObjectMetadata meta = getRequiredMetadata( resourceName );
@@ -355,18 +327,15 @@ public class S3Wagon
         {
             return false;
         }
-        if ( meta.getLastModified() != null
-            && meta.getLastModified().getTime() > timestamp )
+        if ( meta.getLastModified() != null && meta.getLastModified().getTime() > timestamp )
         {
-            fireSessionDebug( "Remote timestamp " + meta.getLastModified()
-                + " is greater than local timestamp " + timestamp
-                + ", ignore get" );
+            fireSessionDebug( "Remote timestamp " + meta.getLastModified() + " is greater than local timestamp "
+                + timestamp + ", ignore get" );
             return false;
         }
         Resource resource = new Resource( resourceName );
         fireGetInitiated( resource, null );
-        InputStream in =
-            s3.getObject( bucketName, keyPrefix ).getObjectContent();
+        InputStream in = s3.getObject( bucketName, keyPrefix ).getObjectContent();
         try
         {
             fireGetStarted( resource, null );
@@ -398,11 +367,9 @@ public class S3Wagon
         {
             if ( e.getStatusCode() == 404 )
             {
-                throw new ResourceDoesNotExistException( "Key " + key
-                    + " does not exist in bucket " + bucketName, e );
+                throw new ResourceDoesNotExistException( "Key " + key + " does not exist in bucket " + bucketName, e );
             }
-            throw new TransferFailedException( "Getting metadata of key " + key
-                + "failed", e );
+            throw new TransferFailedException( "Getting metadata of key " + key + "failed", e );
         }
     }
 
@@ -418,9 +385,8 @@ public class S3Wagon
         // key
         if ( authenticationInfo == null )
         {
-            throw new AuthenticationException(
-                                               "S3 access requires authentication information. Repository is "
-                                                   + getRepository() );
+            throw new AuthenticationException( "S3 access requires authentication information. Repository is "
+                + getRepository() );
         }
 
         // Raise a failure if username is not specified
@@ -430,8 +396,7 @@ public class S3Wagon
                                                "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml. Repository is "
                                                    + getRepository() );
         }
-        boolean instanceProfile =
-            INSTANCE_PROFILE_USER.equalsIgnoreCase( authenticationInfo.getUserName() );
+        boolean instanceProfile = INSTANCE_PROFILE_USER.equalsIgnoreCase( authenticationInfo.getUserName() );
 
         AWSCredentialsProvider credentials;
         if ( instanceProfile )
@@ -448,12 +413,9 @@ public class S3Wagon
                                                    "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml. Repository is "
                                                        + getRepository() );
             }
-            fireSessionDebug( "Creating static credentials "
-                + authenticationInfo.getUserName() );
+            fireSessionDebug( "Creating static credentials " + authenticationInfo.getUserName() );
             credentials =
-                new StaticCredentialsProvider(
-                                               new BasicAWSCredentials(
-                                                                        authenticationInfo.getUserName(),
+                new StaticCredentialsProvider( new BasicAWSCredentials( authenticationInfo.getUserName(),
                                                                         authenticationInfo.getPassword() ) );
         }
 
@@ -461,14 +423,12 @@ public class S3Wagon
         ClientConfiguration config = new ClientConfiguration();
         config.setConnectionTimeout( getTimeout() );
         config.setSocketTimeout( getTimeout() );
-        fireSessionDebug( "Connect timeout and socket timeout is set to "
-            + getTimeout() + " ms" );
+        fireSessionDebug( "Connect timeout and socket timeout is set to " + getTimeout() + " ms" );
 
         // Possible proxy
         ProxyInfo proxy = getProxyInfo();
         fireSessionDebug( "Setting up AWS S3 client with source "
-            + ToStringBuilder.reflectionToString( getRepository() )
-            + ", authentication information and proxy "
+            + ToStringBuilder.reflectionToString( getRepository() ) + ", authentication information and proxy "
             + ToStringBuilder.reflectionToString( proxy ) );
         if ( proxy != null )
         {
@@ -479,8 +439,7 @@ public class S3Wagon
             config.setProxyUsername( proxy.getUserName() );
             config.setProxyWorkstation( proxy.getNtlmHost() );
         }
-        fireSessionDebug( "AWS Client config is "
-            + ToStringBuilder.reflectionToString( config ) );
+        fireSessionDebug( "AWS Client config is " + ToStringBuilder.reflectionToString( config ) );
 
         // Create client
         s3 = new AmazonS3Client( credentials, config );
@@ -506,14 +465,11 @@ public class S3Wagon
     {
         try
         {
-            doPutFromStream( new FileInputStream( source ), source,
-                             destination, source.length(),
-                             source.lastModified() );
+            doPutFromStream( new FileInputStream( source ), source, destination, source.length(), source.lastModified() );
         }
         catch ( FileNotFoundException e )
         {
-            throw new ResourceDoesNotExistException( "Source file " + source
-                + " does not exist", e );
+            throw new ResourceDoesNotExistException( "Source file " + source + " does not exist", e );
         }
     }
 
@@ -521,15 +477,13 @@ public class S3Wagon
      * @inheritDoc
      */
     public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException,
-        AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( destinationDirectory.equals( "." ) )
         {
             destinationDirectory = "";
         }
-        fireTransferDebug( "Putting " + sourceDirectory + " to "
-            + destinationDirectory + " which is noop" );
+        fireTransferDebug( "Putting " + sourceDirectory + " to " + destinationDirectory + " which is noop" );
         for ( File file : sourceDirectory.listFiles() )
         {
             String dest =
@@ -561,8 +515,7 @@ public class S3Wagon
      * @inheritDoc
      */
     @Override
-    public void putFromStream( InputStream in, String destination,
-                               long contentLength, long lastModified )
+    public void putFromStream( InputStream in, String destination, long contentLength, long lastModified )
         throws TransferFailedException, ResourceDoesNotExistException
     {
         doPutFromStream( in, null, destination, contentLength, lastModified );
@@ -587,8 +540,7 @@ public class S3Wagon
             {
                 return false;
             }
-            throw new TransferFailedException( "Can't verify if resource key "
-                + key + " exist or not", e );
+            throw new TransferFailedException( "Can't verify if resource key " + key + " exist or not", e );
         }
     }
 

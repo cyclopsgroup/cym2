@@ -104,7 +104,7 @@ public class UploadMojo
                 File source = new File( fs.getDirectory(), file );
 
                 getLog().info( "Uploading file " + source + " to s3://"
-                                   + bucket + ":" + destPath + file );
+                                   + bucket + "/" + destPath + file );
                 s3.putObject( bucket, destPath + file, source );
             }
         }
