@@ -168,7 +168,7 @@ public class S3Wagon
 
         try
         {
-            fireTransferDebug( "Uploading file " + inFile + " to  key " + key + " in S3 bucket " + bucketName );
+            fireTransferDebug( "Uploading file " + inFile + " to  s3://" + bucketName + "/" + key );
             firePutStarted( resource, inFile );
             s3.putObject( bucketName, key, in, meta );
             firePutCompleted( resource, inFile );
@@ -258,8 +258,8 @@ public class S3Wagon
     /**
      * @inheritDoc
      */
-    @Override
-    public List<String> getFileList( String destinationDirectory )
+    @SuppressWarnings( "rawtypes" )
+    public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException
     {
         String path = keyPrefix + destinationDirectory;

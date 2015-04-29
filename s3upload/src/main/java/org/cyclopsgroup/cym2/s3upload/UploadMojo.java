@@ -26,6 +26,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 public class UploadMojo
     extends AbstractMojo
 {
+    private static final String INSTANCE_PROFILE_USER = "INSTANCE_PROFILE";
+
     @Parameter
     private List<FileSet> fileSets;
 
@@ -55,14 +57,9 @@ public class UploadMojo
         throws MojoExecutionException, MojoFailureException
     {
         AWSCredentialsProvider creds;
-        if ( StringUtils.isNotBlank( awsAccessKeyId )
-            && StringUtils.isNotBlank( awsSecretKey ) )
+        if ( StringUtils.isNotBlank( awsAccessKeyId ) && StringUtils.isNotBlank( awsSecretKey ) )
         {
-            creds =
-                new StaticCredentialsProvider(
-                                               new BasicAWSCredentials(
-                                                                        awsAccessKeyId,
-                                                                        awsSecretKey ) );
+            creds = new StaticCredentialsProvider( new BasicAWSCredentials( awsAccessKeyId, awsSecretKey ) );
         }
         else if ( instanceProfileUsed )
         {
@@ -71,19 +68,23 @@ public class UploadMojo
         else if ( StringUtils.isNotBlank( server ) )
         {
             Server s = settings.getServer( server );
-            if ( s == null || StringUtils.isBlank( s.getUsername() )
-                || StringUtils.isBlank( s.getPassword() ) )
+            if ( s == null )
             {
-                throw new MojoFailureException(
-                                                "Server "
-                                                    + server
-                                                    + " is not defined in settings.xml with proper username and password" );
+                throw new MojoFailureException( "Server " + server + " is not defined in settings.xml" );
             }
-            creds =
-                new StaticCredentialsProvider(
-                                               new BasicAWSCredentials(
-                                                                        s.getUsername(),
-                                                                        s.getPassword() ) );
+            if ( StringUtils.equals( s.getUsername(), INSTANCE_PROFILE_USER ) )
+            {
+                creds = new InstanceProfileCredentialsProvider();
+            }
+            else if ( StringUtils.isBlank( s.getUsername() ) || StringUtils.isBlank( s.getPassword() ) )
+            {
+                throw new MojoFailureException( "Server " + server
+                    + " in settings.xml does not have required username and password" );
+            }
+            else
+            {
+                creds = new StaticCredentialsProvider( new BasicAWSCredentials( s.getUsername(), s.getPassword() ) );
+            }
         }
         else
         {
@@ -103,8 +104,7 @@ public class UploadMojo
             {
                 File source = new File( fs.getDirectory(), file );
 
-                getLog().info( "Uploading file " + source + " to s3://"
-                                   + bucket + "/" + destPath + file );
+                getLog().info( "Uploading file " + source + " to s3://" + bucket + "/" + destPath + file );
                 s3.putObject( bucket, destPath + file, source );
             }
         }

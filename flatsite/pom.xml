@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>cym2</artifactId>
-        <version>1.4.2-SNAPSHOT</version>
+        <version>1.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -34,12 +34,12 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>2.3</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.4</version>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>org.cyclopsgroup</groupId>
@@ -100,7 +100,7 @@
             <extension>
                 <groupId>org.cyclopsgroup</groupId>
                 <artifactId>awss3-maven-wagon</artifactId>
-                <version>1.4.2-SNAPSHOT</version>
+                <version>1.4.2</version>
             </extension>
         </extensions>
     </build>
