@@ -11,7 +11,7 @@
     <artifactId>cym2</artifactId>
     <packaging>pom</packaging>
     <name>CyclopsGroup Maven2 Plugins and Extensions</name>
-    <version>1.4.2</version>
+    <version>1.5.0-SNAPSHOT</version>
     <inceptionYear>2003</inceptionYear>
     <scm>
         <connection>
@@ -25,10 +25,11 @@
         </url>
     </scm>
     <modules>
-        <module>flatsite</module>
-        <module>uberjar</module>
         <module>awss3</module>
+        <module>flatsite</module>
+        <module>protoc</module>
         <module>s3upload</module>
+        <module>uberjar</module>
     </modules>
     <build>
         <pluginManagement>
