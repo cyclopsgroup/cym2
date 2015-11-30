@@ -21,7 +21,7 @@ public class ProtocGenerateMojo
     @Parameter( defaultValue = "protoc" )
     private String protocExecutable;
 
-    @Parameter( defaultValue = "${project.basedir}/target/generated-sources/proto" )
+    @Parameter( defaultValue = "${project.build.directory}/generated-sources/annotations" )
     private String outputDirectory;
 
     @Parameter( defaultValue = "${project.basedir}/src/main/proto" )
