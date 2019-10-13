@@ -77,6 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${mvn.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -86,6 +87,6 @@
     </build>
     <properties>
         <aws.sdk.version>1.11.651</aws.sdk.version>
-        <mvn.version>3.2.1</mvn.version>
+        <mvn.version>3.6.2</mvn.version>
     </properties>
 </project>
