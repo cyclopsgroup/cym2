@@ -33,11 +33,11 @@ import org.apache.maven.wagon.resource.Resource;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -49,8 +49,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
  * Amazon S3 wagon provider implementation.
  */
 public class S3Wagon extends StreamWagon {
-  private static final String INSTANCE_PROFILE_USER = "INSTANCE_PROFILE";
-
   private static Map<String, String> loadMimeTypes() throws IOException {
     Map<String, String> map = new HashMap<String, String>();
     try (LineNumberReader reader = new LineNumberReader(
@@ -293,39 +291,9 @@ public class S3Wagon extends StreamWagon {
    */
   @Override
   protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
-    // Retrieve credentials from authentication information is always
-    // required since it has access key and secret
-    // key
-    if (authenticationInfo == null) {
-      throw new AuthenticationException(
-          "S3 access requires authentication information. Repository is " + getRepository());
-    }
-
-    // Raise a failure if username is not specified
-    if (StringUtils.isEmpty(authenticationInfo.getUserName())) {
-      throw new AuthenticationException(
-          "Tag <username> must set to valid AWS access key ID in server configuration, either in pom.xml or settings.xml. Repository is "
-              + getRepository());
-    }
-    boolean instanceProfile =
-        INSTANCE_PROFILE_USER.equalsIgnoreCase(authenticationInfo.getUserName());
-
-    AWSCredentialsProvider credentials;
-    if (instanceProfile) {
-      fireSessionDebug("Creating instance profile credentials...");
-      credentials = new InstanceProfileCredentialsProvider();
-    } else {
-      // Raise a failure if password is not specified
-      if (StringUtils.isEmpty(authenticationInfo.getPassword())) {
-        throw new AuthenticationException(
-            "Tag <password> must set to valid AWS secret key in server configuration, either in pom.xml or settings.xml. Repository is "
-                + getRepository());
-      }
-      fireSessionDebug("Creating static credentials " + authenticationInfo.getUserName());
-      credentials =
-          new StaticCredentialsProvider(new BasicAWSCredentials(authenticationInfo.getUserName(),
-              authenticationInfo.getPassword()));
-    }
+    AWSCredentialsProvider credentials = new AWSCredentialsProviderChain(
+        new EnvironmentVariableCredentialsProvider(), new InstanceProfileCredentialsProvider(true),
+        new WagonAuthCredentialsProvider(authenticationInfo));
 
     // Pass timeout configuration to AWS client config
     ClientConfiguration config = new ClientConfiguration();
@@ -347,9 +315,9 @@ public class S3Wagon extends StreamWagon {
       config.setProxyWorkstation(proxy.getNtlmHost());
     }
     fireSessionDebug("AWS Client config is " + ToStringBuilder.reflectionToString(config));
-
     // Create client
-    s3 = new AmazonS3Client(credentials, config);
+    s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials)
+        .withClientConfiguration(config).build();
     bucketName = getRepository().getHost();
     fireSessionDebug("Bucket name is " + bucketName);
 
