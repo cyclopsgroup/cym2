@@ -19,6 +19,7 @@ import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
@@ -75,7 +76,8 @@ public class UploadMojo extends AbstractMojo {
     AWSCredentialsProvider creds =
         new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
             new InstanceProfileCredentialsProvider(true), new SelfDefinedCredentials());
-    AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(creds).build();
+    AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1)
+        .withCredentials(creds).build();
     FileSetManager fileSetManager = new FileSetManager(getLog());
     for (FileSet fs : fileSets) {
       String destPath = StringUtils.trimToEmpty(fs.getOutputDirectory());
