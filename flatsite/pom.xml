@@ -97,12 +97,5 @@
         </configuration>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.cyclopsgroup</groupId>
-        <artifactId>awss3-maven-wagon</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
-      </extension>
-    </extensions>
   </build>
 </project>
