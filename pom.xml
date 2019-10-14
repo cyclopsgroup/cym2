@@ -16,14 +16,14 @@
   <inceptionYear>2003</inceptionYear>
   <scm>
     <connection>
-            scm:git:git://github.com/jiaqi/cym2
-        </connection>
+      scm:git:git://github.com/jiaqi/cym2
+    </connection>
     <developerConnection>
-            scm:git:git://github.com/jiaqi/cym2
-        </developerConnection>
+      scm:git:git://github.com/jiaqi/cym2
+    </developerConnection>
     <url>
-            https://github.com/jiaqi/cym2
-        </url>
+      https://github.com/jiaqi/cym2
+    </url>
   </scm>
   <modules>
     <module>flatsite</module>
@@ -88,7 +88,7 @@
       <extension>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>awss3-maven-wagon</artifactId>
-        <version>${project.version}</version>
+        <version>1.5.0</version>
       </extension>
     </extensions>
   </build>
