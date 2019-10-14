@@ -2,7 +2,6 @@ package org.cyclopsgroup.cym2.s3upload;
 
 import java.io.File;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -14,99 +13,83 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
-
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.internal.StaticCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
-@Mojo( name = "upload" )
-public class UploadMojo
-    extends AbstractMojo
-{
-    private static final String INSTANCE_PROFILE_USER = "INSTANCE_PROFILE";
+@Mojo(name = "upload")
+public class UploadMojo extends AbstractMojo {
+  @Parameter
+  private List<FileSet> fileSets;
 
-    @Parameter
-    private List<FileSet> fileSets;
+  @Parameter
+  private String bucket;
 
-    @Parameter
-    private String bucket;
+  @Component
+  private Settings settings;
 
-    @Component
-    private Settings settings;
+  @Parameter
+  private String server;
 
-    @Parameter
-    private String server;
+  @Parameter
+  private String awsAccessKeyId;
 
-    @Parameter
-    private String awsAccessKeyId;
+  @Parameter
+  private String awsSecretKey;
 
-    @Parameter
-    private String awsSecretKey;
+  @Parameter
+  private boolean instanceProfileUsed;
 
-    @Parameter
-    private boolean instanceProfileUsed;
-
-    /**
-     * @inheritDoc
-     */
+  private class SelfDefinedCredentials implements AWSCredentialsProvider {
     @Override
-    public void execute()
-        throws MojoExecutionException, MojoFailureException
-    {
-        AWSCredentialsProvider creds;
-        if ( StringUtils.isNotBlank( awsAccessKeyId ) && StringUtils.isNotBlank( awsSecretKey ) )
-        {
-            creds = new StaticCredentialsProvider( new BasicAWSCredentials( awsAccessKeyId, awsSecretKey ) );
+    public AWSCredentials getCredentials() {
+      if (StringUtils.isNotBlank(awsAccessKeyId) && StringUtils.isNotBlank(awsSecretKey)) {
+        return new BasicAWSCredentials(awsAccessKeyId, awsSecretKey);
+      }
+      if (StringUtils.isNotBlank(server)) {
+        Server s = settings.getServer(server);
+        if (s == null) {
+          throw new IllegalStateException("Server " + server + " is not defined in settings.xml");
         }
-        else if ( instanceProfileUsed )
-        {
-            creds = new InstanceProfileCredentialsProvider();
+        if (StringUtils.isNotBlank(s.getUsername()) && StringUtils.isNotBlank(s.getPassword())) {
+          return new BasicAWSCredentials(s.getUsername(), s.getPassword());
         }
-        else if ( StringUtils.isNotBlank( server ) )
-        {
-            Server s = settings.getServer( server );
-            if ( s == null )
-            {
-                throw new MojoFailureException( "Server " + server + " is not defined in settings.xml" );
-            }
-            if ( StringUtils.equals( s.getUsername(), INSTANCE_PROFILE_USER ) )
-            {
-                creds = new InstanceProfileCredentialsProvider();
-            }
-            else if ( StringUtils.isBlank( s.getUsername() ) || StringUtils.isBlank( s.getPassword() ) )
-            {
-                throw new MojoFailureException( "Server " + server
-                    + " in settings.xml does not have required username and password" );
-            }
-            else
-            {
-                creds = new StaticCredentialsProvider( new BasicAWSCredentials( s.getUsername(), s.getPassword() ) );
-            }
-        }
-        else
-        {
-            throw new MojoFailureException(
-                                            "Must specify awsAccessKeyId+awsSecretKey, server or instanceProfileUsed to provide AWS credentials" );
-        }
-        AmazonS3 s3 = new AmazonS3Client( creds );
-        FileSetManager fileSetManager = new FileSetManager( getLog() );
-        for ( FileSet fs : fileSets )
-        {
-            String destPath = StringUtils.trimToEmpty( fs.getOutputDirectory() );
-            if ( StringUtils.isNotBlank( destPath ) && !destPath.endsWith( "/" ) )
-            {
-                destPath += "/";
-            }
-            for ( String file : fileSetManager.getIncludedFiles( fs ) )
-            {
-                File source = new File( fs.getDirectory(), file );
-
-                getLog().info( "Uploading file " + source + " to s3://" + bucket + "/" + destPath + file );
-                s3.putObject( bucket, destPath + file, source );
-            }
-        }
+      }
+      throw new IllegalStateException("AWS credentials is not defined in plugin or settings.xml.");
     }
+
+    @Override
+    public void refresh() {}
+  }
+
+  /**
+   * @inheritDoc
+   */
+  @Override
+  public void execute() throws MojoExecutionException, MojoFailureException {
+    AWSCredentialsProvider creds =
+        new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
+            new InstanceProfileCredentialsProvider(true), new SelfDefinedCredentials());
+    AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1)
+        .withCredentials(creds).build();
+    FileSetManager fileSetManager = new FileSetManager(getLog());
+    for (FileSet fs : fileSets) {
+      String destPath = StringUtils.trimToEmpty(fs.getOutputDirectory());
+      if (StringUtils.isNotBlank(destPath) && !destPath.endsWith("/")) {
+        destPath += "/";
+      }
+      for (String file : fileSetManager.getIncludedFiles(fs)) {
+        File source = new File(fs.getDirectory(), file);
+
+        getLog().info("Uploading file " + source + " to s3://" + bucket + "/" + destPath + file);
+        s3.putObject(bucket, destPath + file, source);
+      }
+    }
+  }
 }
