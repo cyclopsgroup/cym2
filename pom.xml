@@ -26,7 +26,6 @@
         </url>
   </scm>
   <modules>
-    <module>awss3</module>
     <module>flatsite</module>
     <module>protoc</module>
     <module>s3upload</module>
