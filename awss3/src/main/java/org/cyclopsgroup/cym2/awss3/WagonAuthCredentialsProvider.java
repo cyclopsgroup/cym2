@@ -7,7 +7,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 
-class WagonAuthCredentialsProvider implements AWSCredentialsProvider {
+public class WagonAuthCredentialsProvider implements AWSCredentialsProvider {
   @Nullable
   private final AuthenticationInfo authenticationInfo;
 

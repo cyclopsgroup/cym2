@@ -36,6 +36,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -315,8 +316,10 @@ public class S3Wagon extends StreamWagon {
       config.setProxyWorkstation(proxy.getNtlmHost());
     }
     fireSessionDebug("AWS Client config is " + ToStringBuilder.reflectionToString(config));
-    // Create client
-    s3 = AmazonS3ClientBuilder.standard().withCredentials(credentials)
+    // TODO: At this point the region is hard-coded to US_EAST_1
+    // I understand this is very inflexible. A better implementation is open to
+    // discuss.
+    s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).withCredentials(credentials)
         .withClientConfiguration(config).build();
     bucketName = getRepository().getHost();
     fireSessionDebug("Bucket name is " + bucketName);
