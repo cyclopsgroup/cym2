@@ -69,9 +69,7 @@ public class FlatSiteMojo extends AbstractMojo {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
+  /** @inheritDoc */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (!sourceDirectory.isDirectory()) {
@@ -116,8 +114,8 @@ public class FlatSiteMojo extends AbstractMojo {
     }
   }
 
-  private void generateSiteFile(String fileDirectory, String fileName,
-      VelocityEngine velocityEngine) {
+  private void generateSiteFile(
+      String fileDirectory, String fileName, VelocityEngine velocityEngine) {
     String templatePath = "content/" + mergePath(fileDirectory, fileName);
     File destDirectory = new File(outputDirectory, fileDirectory);
     if (!destDirectory.isDirectory()) {
@@ -131,8 +129,8 @@ public class FlatSiteMojo extends AbstractMojo {
     context.put(layoutKey, layout);
     context.put("templatePath", templatePath);
     context.put("htmlPath", mergePath(fileDirectory, htmlFileName));
-    context.put(XmlTool.TOOL_NAME,
-        new XmlTool(new File(sourceDirectory.getAbsolutePath() + "/resources")));
+    context.put(
+        XmlTool.TOOL_NAME, new XmlTool(new File(sourceDirectory.getAbsolutePath() + "/resources")));
     context.put(WidgetsTool.TOOL_NAME, new WidgetsTool());
     context.put("now", new Date());
     context.put("dateFormat", DateFormat.getDateInstance());
@@ -164,8 +162,14 @@ public class FlatSiteMojo extends AbstractMojo {
       String body = out.toString();
       context.put(bodyKey, body);
 
-      getLog().info("Generating " + htmlFile + " from template " + templatePath + " with layout "
-          + layoutTemplatePath);
+      getLog()
+          .info(
+              "Generating "
+                  + htmlFile
+                  + " from template "
+                  + templatePath
+                  + " with layout "
+                  + layoutTemplatePath);
       FileWriter output = new FileWriter(htmlFile);
       mergeTemplate(layoutTemplatePath, context, output, velocityEngine);
       output.flush();
@@ -183,8 +187,8 @@ public class FlatSiteMojo extends AbstractMojo {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Can't merge velocity template " + path + ". " + e.getMessage(),
-          e);
+      throw new RuntimeException(
+          "Can't merge velocity template " + path + ". " + e.getMessage(), e);
     }
   }
 

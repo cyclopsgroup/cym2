@@ -1,5 +1,14 @@
 package org.cyclopsgroup.cym2.s3upload;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import java.io.File;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
@@ -13,38 +22,22 @@ import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Mojo(name = "upload")
 public class UploadMojo extends AbstractMojo {
-  @Parameter
-  private List<FileSet> fileSets;
+  @Parameter private List<FileSet> fileSets;
 
-  @Parameter
-  private String bucket;
+  @Parameter private String bucket;
 
-  @Component
-  private Settings settings;
+  @Component private Settings settings;
 
-  @Parameter
-  private String server;
+  @Parameter private String server;
 
-  @Parameter
-  private String awsAccessKeyId;
+  @Parameter private String awsAccessKeyId;
 
-  @Parameter
-  private String awsSecretKey;
+  @Parameter private String awsSecretKey;
 
-  @Parameter
-  private boolean instanceProfileUsed;
+  @Parameter private boolean instanceProfileUsed;
 
   private class SelfDefinedCredentials implements AWSCredentialsProvider {
     @Override
@@ -68,16 +61,19 @@ public class UploadMojo extends AbstractMojo {
     public void refresh() {}
   }
 
-  /**
-   * @inheritDoc
-   */
+  /** @inheritDoc */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     AWSCredentialsProvider creds =
-        new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
-            new InstanceProfileCredentialsProvider(true), new SelfDefinedCredentials());
-    AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1)
-        .withCredentials(creds).build();
+        new AWSCredentialsProviderChain(
+            new EnvironmentVariableCredentialsProvider(),
+            new InstanceProfileCredentialsProvider(true),
+            new SelfDefinedCredentials());
+    AmazonS3 s3 =
+        AmazonS3ClientBuilder.standard()
+            .withRegion(Regions.US_EAST_1)
+            .withCredentials(creds)
+            .build();
     FileSetManager fileSetManager = new FileSetManager(getLog());
     for (FileSet fs : fileSets) {
       String destPath = StringUtils.trimToEmpty(fs.getOutputDirectory());

@@ -24,9 +24,7 @@ public class ProtocGenerateMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project.basedir}/src/main/proto")
   private String inputDirectory;
 
-  /**
-   * @inheritDoc
-   */
+  /** @inheritDoc */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     File inputDir = new File(inputDirectory);
@@ -40,8 +38,9 @@ public class ProtocGenerateMojo extends AbstractMojo {
       getLog().info("No proto file is found in " + inputDir + ", exit.");
       return;
     }
-    List<String> args = new ArrayList<String>(
-        Arrays.asList(protocExecutable, "--proto_path=" + inputDir.getAbsolutePath()));
+    List<String> args =
+        new ArrayList<String>(
+            Arrays.asList(protocExecutable, "--proto_path=" + inputDir.getAbsolutePath()));
 
     try {
       File outputDir = new File(outputDirectory);

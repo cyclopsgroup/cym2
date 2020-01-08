@@ -68,7 +68,7 @@ public class UberjarMojo extends AbstractMojo {
   private void addAllEntries(JarOutputStream output, File jarFile) throws IOException {
     getLog().info("Adding everything in " + jarFile + " into uberjar...");
     try (JarFile file = new JarFile(jarFile)) {
-      for (Enumeration<JarEntry> en = file.entries(); en.hasMoreElements();) {
+      for (Enumeration<JarEntry> en = file.entries(); en.hasMoreElements(); ) {
         JarEntry entry = en.nextElement();
         if (entry.isDirectory()) {
           continue;
@@ -103,13 +103,13 @@ public class UberjarMojo extends AbstractMojo {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
+  /** @inheritDoc */
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (!project.getPackaging().equals("jar")) {
-      getLog().error(
-          "Uberjar is only for jar packaging project! Your project is " + project.getPackaging());
+      getLog()
+          .error(
+              "Uberjar is only for jar packaging project! Your project is "
+                  + project.getPackaging());
       return;
     }
 
@@ -169,8 +169,8 @@ public class UberjarMojo extends AbstractMojo {
       manifestEntry.setTime(System.currentTimeMillis());
       output.putNextEntry(manifestEntry);
       getLog().info("Adding Manifest file...");
-      IOUtils.copy(getClass().getClassLoader().getResourceAsStream("classworlds-manifest.txt"),
-          output);
+      IOUtils.copy(
+          getClass().getClassLoader().getResourceAsStream("classworlds-manifest.txt"), output);
 
       output.flush();
       output.close();
