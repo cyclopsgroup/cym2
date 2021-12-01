@@ -41,7 +41,7 @@
       <extension>
         <groupId>org.cyclopsgroup</groupId>
         <artifactId>awss3-maven-wagon</artifactId>
-        <version>${project.version}</version>
+        <version>1.5.0</version>
       </extension>
     </extensions>
   </build>
