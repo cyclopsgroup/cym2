@@ -19,13 +19,13 @@
   <url>http://wiki.cyclopsgroup.org/uberjar-maven-plugin</url>
   <scm>
     <connection>
-      scm:git:git://github.com/jiaqi/cym2/uberjar
+      scm:git:git://github.com/cyclopsgroup/cym2/uberjar
     </connection>
     <developerConnection>
-      scm:git:git://github.com/jiaqi/cym2/uberjar
+      scm:git:git://github.com/cyclopsgroup/cym2/uberjar
     </developerConnection>
     <url>
-      https://github.com/jiaqi/cym2/uberjar
+      https://github.com/cyclopsgroup/cym2/uberjar
     </url>
   </scm>
   <build>

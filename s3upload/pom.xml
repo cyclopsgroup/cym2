@@ -16,13 +16,13 @@
   <inceptionYear>2014</inceptionYear>
   <scm>
     <connection>
-      scm:git:git://github.com/jiaqi/cym2/s3upload
+      scm:git:git://github.com/cyclopsgroup/cym2/s3upload
     </connection>
     <developerConnection>
-      scm:git:git://github.com/jiaqi/cym2/s3upload
+      scm:git:git://github.com/cyclopsgroup/cym2/s3upload
     </developerConnection>
     <url>
-      https://github.com/jiaqi/cym2/s3upload
+      https://github.com/cyclopsgroup/cym2/s3upload
     </url>
   </scm>
   <build>

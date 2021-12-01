@@ -16,13 +16,13 @@
   <inceptionYear>2003</inceptionYear>
   <scm>
     <connection>
-      scm:git:git://github.com/jiaqi/cym2
+      scm:git:git://github.com/cyclopsgroup/cym2
     </connection>
     <developerConnection>
-      scm:git:git://github.com/jiaqi/cym2
+      scm:git:git://github.com/cyclopsgroup/cym2
     </developerConnection>
     <url>
-      https://github.com/jiaqi/cym2
+      https://github.com/cyclopsgroup/cym2
     </url>
   </scm>
   <modules>
